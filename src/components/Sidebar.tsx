@@ -46,7 +46,7 @@ export default function Sidebar({
     { id: 'purchases', label: 'Pembelian (PO)', icon: Truck, roles: [Role.OWNER, Role.MANAGER, Role.ADMIN] },
     { id: 'finance', label: 'Keuangan & Kas', icon: Wallet, roles: [Role.OWNER, Role.MANAGER] },
     { id: 'ai-assistant', label: 'Analitik AI Gemini', icon: Sparkles, roles: [Role.OWNER, Role.MANAGER, Role.ADMIN, Role.CASHIER] },
-    { id: 'audit', label: 'Keamanan & Audit', icon: FileLock, roles: [Role.OWNER] },
+    { id: 'audit', label: 'Database Sheet & Audit', icon: FileLock, roles: [Role.OWNER, Role.ADMIN] },
   ];
 
   const allowedItems = menuItems.filter(item => 

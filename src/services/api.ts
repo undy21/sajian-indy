@@ -2,6 +2,23 @@ import { MockDatabase } from './mockDb';
 import { Product, Transaction, TransactionItem, Customer, Supplier, Purchase, CashFlow, AuditLog, User, Role, StockLog, Voucher, NotificationItem, Branch } from '../types';
 
 export class ApiService {
+  private static isServerAvailable: boolean | null = null;
+
+  private static async checkServerAvailability(): Promise<boolean> {
+    if (this.isServerAvailable !== null) return this.isServerAvailable;
+    try {
+      const response = await fetch('/api/health', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' },
+      });
+      const data = await response.json();
+      this.isServerAvailable = data && data.status === 'ok';
+    } catch (e) {
+      this.isServerAvailable = false;
+    }
+    return this.isServerAvailable;
+  }
+
   private static get url(): string {
     return localStorage.getItem('pos_apps_script_url') || '';
   }
@@ -12,6 +29,11 @@ export class ApiService {
 
   static async request<T>(action: string, payload?: any): Promise<T> {
     if (!this.isConnectedToGoogleSheets()) {
+      const serverAlive = await this.checkServerAvailability();
+      if (!serverAlive) {
+        return this.handleLocalRequest(action, payload);
+      }
+
       try {
         const response = await fetch('/api/db', {
           method: 'POST',
@@ -45,8 +67,29 @@ export class ApiService {
       }
       return data.data as T;
     } catch (err: any) {
-      console.error(`Failed GAS Web App Request [${action}]: `, err);
-      throw err;
+      console.warn(`Failed GAS Web App Request [${action}]:`, err, `- Falling back to server database or client-side storage`);
+      const serverAlive = await this.checkServerAvailability();
+      if (!serverAlive) {
+        return this.handleLocalRequest(action, payload);
+      }
+
+      try {
+        const response = await fetch('/api/db', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ action, payload }),
+        });
+        const resData = await response.json();
+        if (resData.status === 'error') {
+          throw new Error(resData.message);
+        }
+        return resData.data as T;
+      } catch (innerErr: any) {
+        console.error(`Failed fallback Server DB Request [${action}]. Falling back to client state:`, innerErr);
+        return this.handleLocalRequest(action, payload);
+      }
     }
   }
 

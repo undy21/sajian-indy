@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { handleAction } from "./server-db";
@@ -37,6 +38,21 @@ function getAiClient(): GoogleGenAI | null {
 // 1. API Endpoints
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", mode: process.env.NODE_ENV || "development" });
+});
+
+// Endpoint to fetch Code.gs content dynamically
+app.get("/api/apps-script-code", (req, res) => {
+  try {
+    const codePath = path.join(process.cwd(), "apps-script", "Code.gs");
+    if (fs.existsSync(codePath)) {
+      const code = fs.readFileSync(codePath, "utf-8");
+      res.json({ status: "success", code });
+    } else {
+      res.status(404).json({ status: "error", message: "File Code.gs tidak ditemukan." });
+    }
+  } catch (err: any) {
+    res.status(500).json({ status: "error", message: err.message });
+  }
 });
 
 // Centralized persistent JSON file DB endpoint
