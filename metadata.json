@@ -1,0 +1,6 @@
+{
+  "name": "Sajian Indy",
+  "description": "Sistem Point of Sale (POS) modern Sajian Indy berbasis Web App dengan database Google Sheets serverless, multi-cabang, sistem audit lengkap, dan analisis bisnis bertenaga AI Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
