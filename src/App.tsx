@@ -154,7 +154,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem('GAS_DEPLOYMENT_URL') || '';
+    let savedUrl = localStorage.getItem('GAS_DEPLOYMENT_URL');
+    if (!savedUrl) {
+      savedUrl = ((import.meta as any).env.VITE_GAS_DEPLOYMENT_URL as string) || '';
+      if (savedUrl) {
+        localStorage.setItem('GAS_DEPLOYMENT_URL', savedUrl);
+        localStorage.setItem('pos_apps_script_url', savedUrl);
+      }
+    }
     setGasDeploymentUrl(savedUrl);
     api.setGasUrl(savedUrl);
     loadAllData();

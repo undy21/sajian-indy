@@ -20,7 +20,7 @@ export class ApiService {
   }
 
   private static get url(): string {
-    return localStorage.getItem('pos_apps_script_url') || '';
+    return localStorage.getItem('pos_apps_script_url') || ((import.meta as any).env.VITE_GAS_DEPLOYMENT_URL as string) || '';
   }
 
   static isConnectedToGoogleSheets(): boolean {
